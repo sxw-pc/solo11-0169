@@ -16,6 +16,13 @@ CREATE TABLE IF NOT EXISTS return_case(id TEXT PRIMARY KEY,repair_id TEXT,vin TE
 CREATE TABLE IF NOT EXISTS liability(id INTEGER PRIMARY KEY,case_id TEXT,status TEXT,responsible_party TEXT,reason TEXT,at TEXT);
 CREATE TABLE IF NOT EXISTS emission_run(id TEXT PRIMARY KEY,vin TEXT,phase TEXT,started_at TEXT,ended_at TEXT,dyno_load_kw INTEGER,exhaust_lpm INTEGER,dilution_factor REAL,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS gas_sample(id TEXT PRIMARY KEY,run_id TEXT,compound TEXT,ppm REAL,analyzer TEXT,sampled_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS emission_series(id TEXT PRIMARY KEY,run_id TEXT,channel TEXT,hz REAL,unit TEXT,analyzer TEXT,points TEXT,clipped TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS analyzer_kernel(id TEXT PRIMARY KEY,analyzer TEXT,delay_min_s REAL,delay_max_s REAL,tau_s REAL,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS clock_sync(id TEXT PRIMARY KEY,run_id TEXT,analyzer TEXT,offset_s REAL,drift_ppm REAL,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS dilution_air(id TEXT PRIMARY KEY,run_id TEXT,lpm REAL,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS calibration(id TEXT PRIMARY KEY,analyzer TEXT,method TEXT,measured_delay_s REAL,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS emission_cert(id TEXT PRIMARY KEY,run_id TEXT,scope TEXT,status TEXT,peak_ppm REAL,mass_min REAL,mass_max REAL,threshold REAL,reason TEXT,calibration_id TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS cert_event(id INTEGER PRIMARY KEY,cert_id TEXT,action TEXT,reason TEXT,at TEXT);
 '''
 @contextmanager
 def connect(path):
@@ -46,4 +53,5 @@ def repeated(db,table,key,sid):
     return False
 def snapshot(db):
     return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')]
-            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','emission_run','gas_sample')}
+            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','emission_run','gas_sample',
+                      'emission_series','analyzer_kernel','clock_sync','dilution_air','calibration','emission_cert','cert_event')}

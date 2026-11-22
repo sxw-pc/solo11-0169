@@ -17,5 +17,10 @@ def sample(path,file):
         db.execute('INSERT INTO gas_sample VALUES(?,?,?,?,?,?,?)',(d['id'],d['run_id'],d['compound'],d['ppm'],d['analyzer'],at(d['sampled_at']),sid))
         return {'id':d['id'],'replayed':False}
 def readings(path):
-    with connect(path) as db:return {'runs':[dict(x) for x in db.execute('SELECT * FROM emission_run ORDER BY id')],
-                                    'samples':[dict(x) for x in db.execute('SELECT * FROM gas_sample ORDER BY id')]}
+    with connect(path) as db:
+        out={'runs':[dict(x) for x in db.execute('SELECT * FROM emission_run ORDER BY id')],
+             'samples':[dict(x) for x in db.execute('SELECT * FROM gas_sample ORDER BY id')]}
+        for key,table in [('series','emission_series'),('kernels','analyzer_kernel'),('clock_syncs','clock_sync'),
+                          ('dilution','dilution_air'),('calibrations','calibration'),('certs','emission_cert')]:
+            out[key]=[dict(x) for x in db.execute(f'SELECT * FROM {table} ORDER BY 1')]
+        return out
