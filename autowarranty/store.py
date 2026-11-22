@@ -17,6 +17,13 @@ CREATE TABLE IF NOT EXISTS liability(id INTEGER PRIMARY KEY,case_id TEXT,status 
 CREATE TABLE IF NOT EXISTS battery_pack(id TEXT PRIMARY KEY,vin TEXT,nominal_ah INTEGER,cell_count INTEGER,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS charge_test(id TEXT PRIMARY KEY,pack_id TEXT,start_soc INTEGER,end_soc INTEGER,amp_hours REAL,temp_c INTEGER,started_at TEXT,ended_at TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS resistance_test(id TEXT PRIMARY KEY,pack_id TEXT,milliohms REAL,temp_c INTEGER,measured_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS pack_composition(id TEXT PRIMARY KEY,pack_id TEXT,generation INTEGER,composition TEXT,calibration TEXT,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS use_agreement(id TEXT PRIMARY KEY,pack_id TEXT,buyer TEXT,kind TEXT,window_start INTEGER,window_end INTEGER,min_full_ah REAL,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS window_evidence(id TEXT PRIMARY KEY,pack_id TEXT,charge_test_id TEXT,composition TEXT,calibration TEXT,coulomb_bms_ah REAL,coulomb_independent_ah REAL,min_cell_mv INTEGER,rest_mv INTEGER,temp_c INTEGER,soc_trace TEXT,curve TEXT,at TEXT,status TEXT,detail TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS full_cycle_test(id TEXT PRIMARY KEY,pack_id TEXT,composition TEXT,calibration TEXT,start_soc INTEGER,end_soc INTEGER,amp_hours REAL,weakest_cell_ah REAL,min_cell_mv INTEGER,rest_mv INTEGER,temp_c INTEGER,coulomb_bms_ah REAL,coulomb_independent_ah REAL,started_at TEXT,ended_at TEXT,status TEXT,detail TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS use_certificate(id TEXT PRIMARY KEY,pack_id TEXT,agreement_id TEXT,scope TEXT,window_start INTEGER,window_end INTEGER,certified_ah REAL,status TEXT,issued_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS use_order(id TEXT PRIMARY KEY,pack_id TEXT,agreement_id TEXT,status TEXT,ordered_at TEXT,closed_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS grade_event(id INTEGER PRIMARY KEY,pack_id TEXT,kind TEXT,ref_id TEXT,at TEXT,detail TEXT);
 '''
 @contextmanager
 def connect(path):
@@ -47,4 +54,5 @@ def repeated(db,table,key,sid):
     return False
 def snapshot(db):
     return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')]
-            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','battery_pack','charge_test','resistance_test')}
+            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','battery_pack','charge_test','resistance_test',
+                      'pack_composition','use_agreement','window_evidence','full_cycle_test','use_certificate','use_order','grade_event')}

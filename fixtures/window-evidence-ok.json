@@ -1,0 +1,1 @@
+{"id":"WE1","pack_id":"BAT1","charge_test_id":"CT1","composition":"CELL-96S-A","calibration":"CAL-2026-04","coulomb_bms_ah":38.0,"coulomb_independent_ah":38.1,"min_cell_mv":3050,"rest_mv":3300,"temp_c":25,"soc_trace":[[20,0.0],[30,9.5],[40,19.0],[50,28.5],[60,38.0]],"curve":[[20,0.0],[30,9.5],[40,19.0],[50,28.5],[60,38.0]],"at":"2026-05-01T09:05:00Z"}
