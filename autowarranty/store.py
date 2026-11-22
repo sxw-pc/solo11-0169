@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS feature_entitlement(id TEXT PRIMARY KEY,vin TEXT,feat
 CREATE TABLE IF NOT EXISTS trial_assignment(id TEXT PRIMARY KEY,vin TEXT,arm TEXT,package_id TEXT,assigned_at TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS drive_session(id TEXT PRIMARY KEY,vin TEXT,started_at TEXT,ended_at TEXT,distance_km REAL,route_class TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS safety_alert(id TEXT PRIMARY KEY,session_id TEXT,kind TEXT,occurred_at TEXT,severity INTEGER,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS trial_wave(id TEXT PRIMARY KEY,seed TEXT,package_id TEXT,new_size INTEGER,control_size INTEGER,started_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS release_criterion(id TEXT,version INTEGER,kind TEXT,signed_at TEXT,params TEXT,source_id INTEGER,PRIMARY KEY(id,version));
+CREATE TABLE IF NOT EXISTS version_attestation(id TEXT PRIMARY KEY,ecu_id TEXT,package_id TEXT,boot_counter INTEGER,booted_at TEXT,attested_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS hazard_map(id TEXT PRIMARY KEY,route_class TEXT,risk_level REAL,valid_from TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS trial_decision(id INTEGER PRIMARY KEY,criterion_id TEXT,criterion_version INTEGER,decided_at TEXT,verdict TEXT,detail TEXT,supersedes INTEGER);
 '''
 @contextmanager
 def connect(path):
@@ -51,4 +56,4 @@ def repeated(db,table,key,sid):
     return False
 def snapshot(db):
     return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')]
-            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','ecu','software_package','install_receipt','feature_entitlement','trial_assignment','drive_session','safety_alert')}
+            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','ecu','software_package','install_receipt','feature_entitlement','trial_assignment','drive_session','safety_alert','trial_wave','release_criterion','version_attestation','hazard_map','trial_decision')}
