@@ -6,10 +6,11 @@ def report(path):
     with connect(path) as db:return {'state':snapshot(db),'sources':[{'kind':x['kind'],'sha':x['sha']} for x in db.execute('SELECT kind,sha FROM source ORDER BY id')]}
 
 def audit(path):
-    from . import diagnosis,repair,warranty
+    from . import diagnosis,repair,warranty,emissions
     funcs={'vehicle':diagnosis.vehicle,'diagnosis':diagnosis.diagnose,'authorization':diagnosis.authorize,
            'part':repair.part,'repair':repair.execute,'inspection':repair.inspect,
-           'warranty':warranty.grant,'return_case':warranty.return_case}
+           'warranty':warranty.grant,'return_case':warranty.return_case,
+           'emission_run':emissions.run,'gas_sample':emissions.sample}
     original=report(path)
     with connect(path) as db:events=[(x['kind'],x['raw']) for x in db.execute('SELECT kind,raw FROM source ORDER BY id')]
     with TemporaryDirectory() as tmp:
