@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS ecu(id TEXT PRIMARY KEY,vin TEXT,role TEXT,serial TEX
 CREATE TABLE IF NOT EXISTS software_package(id TEXT PRIMARY KEY,role TEXT,version TEXT,digest TEXT,minimum_peer TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS install_receipt(id TEXT PRIMARY KEY,ecu_id TEXT,package_id TEXT,phase TEXT,boot_counter INTEGER,observed_at TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS feature_entitlement(id TEXT PRIMARY KEY,vin TEXT,feature TEXT,valid_from TEXT,valid_to TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS trial_assignment(id TEXT PRIMARY KEY,vin TEXT,arm TEXT,package_id TEXT,assigned_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS drive_session(id TEXT PRIMARY KEY,vin TEXT,started_at TEXT,ended_at TEXT,distance_km REAL,route_class TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS safety_alert(id TEXT PRIMARY KEY,session_id TEXT,kind TEXT,occurred_at TEXT,severity INTEGER,source_id INTEGER);
 '''
 @contextmanager
 def connect(path):
@@ -48,4 +51,4 @@ def repeated(db,table,key,sid):
     return False
 def snapshot(db):
     return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')]
-            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','ecu','software_package','install_receipt','feature_entitlement')}
+            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','ecu','software_package','install_receipt','feature_entitlement','trial_assignment','drive_session','safety_alert')}
