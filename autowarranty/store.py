@@ -14,6 +14,10 @@ CREATE TABLE IF NOT EXISTS inspection(id TEXT PRIMARY KEY,repair_id TEXT,inspect
 CREATE TABLE IF NOT EXISTS warranty(id TEXT PRIMARY KEY,repair_id TEXT,valid_to TEXT,covered_symptom TEXT,status TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS return_case(id TEXT PRIMARY KEY,repair_id TEXT,vin TEXT,symptom TEXT,occurred_at TEXT,external_damage INTEGER,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS liability(id INTEGER PRIMARY KEY,case_id TEXT,status TEXT,responsible_party TEXT,reason TEXT,at TEXT);
+CREATE TABLE IF NOT EXISTS loaner(id TEXT PRIMARY KEY,plate TEXT,model TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS loan_agreement(id TEXT PRIMARY KEY,customer_vin TEXT,loaner_id TEXT,borrower TEXT,started_at TEXT,due_at TEXT,plan TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS trip_fix(id TEXT PRIMARY KEY,agreement_id TEXT,observed_at TEXT,x_m INTEGER,y_m INTEGER,accuracy_m INTEGER,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS toll_receipt(id TEXT PRIMARY KEY,plate TEXT,gate TEXT,passed_at TEXT,cents INTEGER,source_id INTEGER);
 '''
 @contextmanager
 def connect(path):
@@ -44,4 +48,4 @@ def repeated(db,table,key,sid):
     return False
 def snapshot(db):
     return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')]
-            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability')}
+            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','loaner','loan_agreement','trip_fix','toll_receipt')}
