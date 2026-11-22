@@ -1,0 +1,1 @@
+{"id":"LA2","customer_vin":"VIN-1","loaner_id":"LV1","borrower":"OWNER-1","started_at":"2026-05-01T08:00:00Z","due_at":"2026-05-03T08:00:00Z","plan":"fixed-daily","daily_cents":300,"version":1}

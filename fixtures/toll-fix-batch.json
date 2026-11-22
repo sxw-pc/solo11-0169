@@ -1,0 +1,1 @@
+{"id":"FB1","agreement_id":"LA1","fixes":[{"id":"GF-A","observed_at":"2026-05-01T09:00:00Z","x_m":100,"y_m":200,"accuracy_m":20},{"id":"GF-B","observed_at":"2026-05-01T09:06:00Z","x_m":3000,"y_m":200,"accuracy_m":20}]}

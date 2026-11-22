@@ -1,32 +1,44 @@
-from .store import connect,source,at,repeated
+"""代步车租约、轨迹与收费回执的采录入口。
 
-def asset(path,file):
-    with connect(path) as db,db:
-        sid,d,_=source(db,'loaner',file)
-        if repeated(db,'loaner',d['id'],sid):return {'id':d['id'],'replayed':True}
-        db.execute('INSERT INTO loaner VALUES(?,?,?,?)',(d['id'],d['plate'],d['model'],sid))
-        return {'id':d['id'],'replayed':False}
-def agreement(path,file):
-    with connect(path) as db,db:
-        sid,d,_=source(db,'loan_agreement',file)
-        if repeated(db,'loan_agreement',d['id'],sid):return {'id':d['id'],'replayed':True}
-        if not db.execute('SELECT 1 FROM vehicle WHERE vin=?',(d['customer_vin'],)).fetchone():raise ValueError('unknown_customer_vehicle')
-        if not db.execute('SELECT 1 FROM loaner WHERE id=?',(d['loaner_id'],)).fetchone():raise ValueError('unknown_loaner')
-        db.execute('INSERT INTO loan_agreement VALUES(?,?,?,?,?,?,?,?)',(d['id'],d['customer_vin'],d['loaner_id'],d['borrower'],at(d['started_at']),at(d['due_at']),d['plan'],sid))
-        return {'id':d['id'],'replayed':False}
-def fix(path,file):
-    with connect(path) as db,db:
-        sid,d,_=source(db,'trip_fix',file)
-        if repeated(db,'trip_fix',d['id'],sid):return {'id':d['id'],'replayed':True}
-        if not db.execute('SELECT 1 FROM loan_agreement WHERE id=?',(d['agreement_id'],)).fetchone():raise ValueError('unknown_agreement')
-        db.execute('INSERT INTO trip_fix VALUES(?,?,?,?,?,?,?)',(d['id'],d['agreement_id'],at(d['observed_at']),d['x_m'],d['y_m'],d['accuracy_m'],sid))
-        return {'id':d['id'],'replayed':False}
-def toll(path,file):
-    with connect(path) as db,db:
-        sid,d,_=source(db,'toll_receipt',file)
-        if repeated(db,'toll_receipt',d['id'],sid):return {'id':d['id'],'replayed':True}
-        db.execute('INSERT INTO toll_receipt VALUES(?,?,?,?,?,?)',(d['id'],d['plate'],d['gate'],at(d['passed_at']),d['cents'],sid))
-        return {'id':d['id'],'replayed':False}
+`loaner_tolls` 负责同一批证据的逐次通行核销；这里只保留现有采录与并排查询接口，
+避免把维修/保修账与代步车通行账混在一起。
+"""
+from . import loaner_tolls
+from .store import connect
+
+
+def asset(path, file):
+    from .store import source, repeated
+    with connect(path) as db, db:
+        sid, d, _ = source(db, 'loaner', file)
+        if repeated(db, 'loaner', d['id'], sid):
+            return {'id': d['id'], 'replayed': True}
+        if not d.get('id') or not d.get('plate'):
+            raise ValueError('loaner_identity_missing')
+        db.execute('INSERT INTO loaner VALUES(?,?,?,?)',
+                   (d['id'], d['plate'], d['model'], sid))
+        return {'id': d['id'], 'replayed': False}
+
+
+def agreement(path, file):
+    return loaner_tolls.agreement(path, file)
+
+
+def fix(path, file):
+    return loaner_tolls.fix(path, file)
+
+
+def toll(path, file):
+    return loaner_tolls.toll(path, file)
+
+
 def trips(path):
-    with connect(path) as db:return {'fixes':[dict(x) for x in db.execute('SELECT * FROM trip_fix ORDER BY id')],
-                                    'tolls':[dict(x) for x in db.execute('SELECT * FROM toll_receipt ORDER BY id')]}
+    with connect(path) as db:
+        fixes = [dict(x) for x in db.execute(
+            'SELECT id,agreement_id,observed_at,x_m,y_m,accuracy_m FROM trip_fix')]
+        fixes += [dict(x) for x in db.execute(
+            'SELECT id,agreement_id,observed_at,x_m,y_m,accuracy_m FROM fix_batch_item')]
+        fixes.sort(key=lambda x: (x['observed_at'], x['id']))
+        return {'fixes': fixes,
+                'tolls': [dict(x) for x in db.execute(
+                    'SELECT * FROM toll_receipt ORDER BY id')]}
