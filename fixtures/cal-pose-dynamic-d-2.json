@@ -1,0 +1,8 @@
+{
+  "id": "RPD-D-2",
+  "camera_id": "CAMD",
+  "speed_kph": 60,
+  "pitch_mdeg": 600,
+  "load_kg": 200,
+  "observed_at": "2026-05-05T09:00:00Z"
+}

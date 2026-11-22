@@ -1,0 +1,26 @@
+{
+  "id": "TBC-P",
+  "board_serial": "BOARD-CENTRAL-P",
+  "points": [
+    [
+      -300.0,
+      12000.0
+    ],
+    [
+      300.0,
+      12000.0
+    ],
+    [
+      -300.0,
+      14000.0
+    ],
+    [
+      300.0,
+      14000.0
+    ]
+  ],
+  "ground_plane": true,
+  "verification": false,
+  "pitch_mrad": 0,
+  "survey_at": "2026-05-03T09:00:00Z"
+}

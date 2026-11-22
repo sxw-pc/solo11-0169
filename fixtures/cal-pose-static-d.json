@@ -1,0 +1,8 @@
+{
+  "id": "RPS-D",
+  "camera_id": "CAMD",
+  "speed_kph": 0,
+  "pitch_mdeg": 300,
+  "load_kg": 200,
+  "observed_at": "2026-05-04T09:00:00Z"
+}

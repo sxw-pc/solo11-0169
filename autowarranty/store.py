@@ -15,9 +15,13 @@ CREATE TABLE IF NOT EXISTS warranty(id TEXT PRIMARY KEY,repair_id TEXT,valid_to 
 CREATE TABLE IF NOT EXISTS return_case(id TEXT PRIMARY KEY,repair_id TEXT,vin TEXT,symptom TEXT,occurred_at TEXT,external_damage INTEGER,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS liability(id INTEGER PRIMARY KEY,case_id TEXT,status TEXT,responsible_party TEXT,reason TEXT,at TEXT);
 CREATE TABLE IF NOT EXISTS camera_unit(id TEXT PRIMARY KEY,vin TEXT,serial TEXT,lens_model TEXT,width_px INTEGER,height_px INTEGER,source_id INTEGER);
-CREATE TABLE IF NOT EXISTS target_board(id TEXT PRIMARY KEY,board_serial TEXT,points_json TEXT,survey_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS target_board(id TEXT PRIMARY KEY,board_serial TEXT,points_json TEXT,ground_plane INTEGER,verification INTEGER,pitch_mrad REAL DEFAULT 0,survey_at TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS image_point(id TEXT PRIMARY KEY,camera_id TEXT,board_id TEXT,corner_no INTEGER,u_px REAL,v_px REAL,captured_at TEXT,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS road_pose(id TEXT PRIMARY KEY,camera_id TEXT,speed_kph INTEGER,pitch_mdeg INTEGER,load_kg INTEGER,observed_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS camera_mount(camera_id TEXT PRIMARY KEY,mount_generation INTEGER,serial TEXT,lens_model TEXT,updated_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS calibration(id TEXT PRIMARY KEY,camera_id TEXT,vin TEXT,serial TEXT,lens_model TEXT,mount_generation INTEGER,supersedes_id TEXT,lineage_note TEXT,params_json TEXT,observability_json TEXT,bounds_json TEXT,basis_json TEXT,next_target_json TEXT,summary_json TEXT,status TEXT,created_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS activation(id TEXT PRIMARY KEY,calibration_id TEXT,camera_id TEXT,profile TEXT,decision TEXT,steering_control INTEGER,restrictions_json TEXT,reasons_json TEXT,status TEXT,created_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS withdrawal_task(id TEXT PRIMARY KEY,calibration_id TEXT,activation_id TEXT,camera_id TEXT,reason TEXT,status TEXT,created_at TEXT,executed_at TEXT,source_id INTEGER);
 '''
 @contextmanager
 def connect(path):
@@ -48,4 +52,4 @@ def repeated(db,table,key,sid):
     return False
 def snapshot(db):
     return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')]
-            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','camera_unit','target_board','image_point','road_pose')}
+            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','camera_unit','target_board','image_point','road_pose','camera_mount','calibration','activation','withdrawal_task')}
