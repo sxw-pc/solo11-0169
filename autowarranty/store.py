@@ -15,8 +15,16 @@ CREATE TABLE IF NOT EXISTS warranty(id TEXT PRIMARY KEY,repair_id TEXT,valid_to 
 CREATE TABLE IF NOT EXISTS return_case(id TEXT PRIMARY KEY,repair_id TEXT,vin TEXT,symptom TEXT,occurred_at TEXT,external_damage INTEGER,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS liability(id INTEGER PRIMARY KEY,case_id TEXT,status TEXT,responsible_party TEXT,reason TEXT,at TEXT);
 CREATE TABLE IF NOT EXISTS paint_sample(id TEXT PRIMARY KEY,vin TEXT,panel TEXT,illuminant TEXT,rgb_json TEXT,spectrum_json TEXT,measured_at TEXT,source_id INTEGER);
-CREATE TABLE IF NOT EXISTS pigment_lot(id TEXT PRIMARY KEY,pigment TEXT,batch TEXT,spectrum_json TEXT,available_ml INTEGER,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS pigment_lot(id TEXT PRIMARY KEY,pigment TEXT,batch TEXT,spectrum_json TEXT,available_ml INTEGER,cost_per_ml REAL,scatter REAL,pearl INTEGER,source_id INTEGER);
 CREATE TABLE IF NOT EXISTS spray_panel(id TEXT PRIMARY KEY,vin TEXT,recipe_json TEXT,illuminant TEXT,rgb_json TEXT,sprayed_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS paint_order(id TEXT PRIMARY KEY,vin TEXT,panel TEXT,kind TEXT,illuminants_json TEXT,needed_ml INTEGER,geometry TEXT,at TEXT,status TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS band_measurement(id TEXT PRIMARY KEY,subject_kind TEXT,subject_id TEXT,bands_json TEXT,values_json TEXT,geometry TEXT,calibration TEXT,measured_at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS mix_order(id TEXT PRIMARY KEY,order_id TEXT,recipe_json TEXT,basis TEXT,required_json TEXT,status TEXT,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS paint_draw(id TEXT PRIMARY KEY,mix_order_id TEXT,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS paint_ledger(id INTEGER PRIMARY KEY,lot_id TEXT,kind TEXT,ml REAL,ref TEXT,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS spray_event(id TEXT PRIMARY KEY,mix_order_id TEXT,vin TEXT,panel TEXT,booth TEXT,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS paint_rework(id TEXT PRIMARY KEY,order_id TEXT,mix_order_id TEXT,measurement_id TEXT,escalated_json TEXT,at TEXT,source_id INTEGER);
+CREATE TABLE IF NOT EXISTS work_order(id TEXT PRIMARY KEY,order_id TEXT,mix_order_id TEXT,kind TEXT,detail_json TEXT,status TEXT,source_id INTEGER);
 '''
 @contextmanager
 def connect(path):
@@ -47,4 +55,4 @@ def repeated(db,table,key,sid):
     return False
 def snapshot(db):
     return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')]
-            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','paint_sample','pigment_lot','spray_panel')}
+            for t in ('vehicle','diagnosis','authorization','part','repair','inspection','warranty','return_case','liability','paint_sample','pigment_lot','spray_panel','paint_order','band_measurement','mix_order','paint_draw','paint_ledger','spray_event','paint_rework','work_order')}

@@ -12,7 +12,7 @@ def pigment(path,file):
     with connect(path) as db,db:
         sid,d,_=source(db,'pigment_lot',file)
         if repeated(db,'pigment_lot',d['id'],sid):return {'id':d['id'],'replayed':True}
-        db.execute('INSERT INTO pigment_lot VALUES(?,?,?,?,?,?)',(d['id'],d['pigment'],d['batch'],json.dumps(d['spectrum']),d['available_ml'],sid))
+        db.execute('INSERT INTO pigment_lot VALUES(?,?,?,?,?,?,?,?,?)',(d['id'],d['pigment'],d['batch'],json.dumps(d['spectrum']),d['available_ml'],d.get('cost_per_ml',1.0),d.get('scatter',1.0),1 if d.get('pearl') else 0,sid))
         return {'id':d['id'],'replayed':False}
 def panel(path,file):
     with connect(path) as db,db:
@@ -22,4 +22,5 @@ def panel(path,file):
         db.execute('INSERT INTO spray_panel VALUES(?,?,?,?,?,?,?)',(d['id'],d['vin'],json.dumps(d['recipe']),d['illuminant'],json.dumps(d['rgb']),at(d['sprayed_at']),sid))
         return {'id':d['id'],'replayed':False}
 def captures(path):
-    with connect(path) as db:return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY id')] for t in ('paint_sample','pigment_lot','spray_panel')}
+    tables=('paint_sample','pigment_lot','spray_panel','paint_order','band_measurement','mix_order','paint_draw','paint_ledger','spray_event','paint_rework','work_order')
+    with connect(path) as db:return {t:[dict(x) for x in db.execute(f'SELECT * FROM {t} ORDER BY 1')] for t in tables}
